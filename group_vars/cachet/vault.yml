@@ -1,0 +1,18 @@
+---
+# A Laravel app key, used for some encryption/hashing functions
+# You can create this on the command line by running:
+# echo "base64:$(openssl rand -base64 32)"
+# Example: base64:jQjc24uILf+bxuV1ItZ9whqdIn3POCxQReTIEYIqhVg=
+vault_cachet_app_key:
+
+# SMTP password or api token for mail service
+# Example: a password or token string
+vault_cachet_mail_password:
+
+# Spaces object storage key
+# Example: SY4PEO44VSD46QKA7GLC
+vault_cachet_spaces_key:
+
+# Spaces object storage secret
+# Example: S4QYCAqXT+FbIvuauJqkb+F2Lnwh5GqtGZwGkgbddOw
+vault_cachet_spaces_secret:

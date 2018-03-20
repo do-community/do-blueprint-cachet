@@ -1,0 +1,19 @@
+---
+cachet_version: v2.3.13
+
+cachet_app_env: production
+cachet_app_debug: false
+
+cachet_db_driver: mysql
+cachet_db_host: localhost
+
+cachet_cache_driver: apc
+cachet_session_driver: apc
+cachet_queue_driver: database
+cachet_cachet_emoji: false
+
+cachet_redis_host: null
+cachet_redis_database: null
+cachet_redis_port: null
+
+cachet_github_token: null

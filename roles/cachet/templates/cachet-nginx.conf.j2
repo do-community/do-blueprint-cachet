@@ -1,0 +1,9 @@
+server {
+    listen 80 default;
+    listen [::]:80 default;
+    server_name {{ cachet_hostname }};
+
+    location / {
+        return 301 https://{{ cachet_hostname }}$request_uri;
+    }
+}

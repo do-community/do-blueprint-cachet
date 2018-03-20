@@ -1,0 +1,49 @@
+---
+# The hostname visitors can reach your status page at
+# Example: status.example.com
+cachet_hostname:
+
+# Mail driver information for Cachet. See README for examples, or
+# the official docs: https://docs.cachethq.io/docs/configuring-mail
+cachet_mail_driver:
+cachet_mail_host:
+cachet_mail_port:
+cachet_mail_username:
+cachet_mail_password: "{{ vault_cachet_mail_password }}"
+cachet_mail_from_address:
+cachet_mail_from_name:
+cachet_mail_encryption:
+
+# Please review the Let's Encrypt subscriber agreement here:
+# https://letsencrypt.org/documents/2017.11.15-LE-SA-v1.2.pdf
+
+# Email address to register w/ Let's Encrypt
+# This email will receive renewal/revocation warnings if necessary
+# Example: user@example.com
+cachet_letsencrypt_email:
+
+# Email address to send backup system alerts FROM
+# Example: backup-status@example.com
+cachet_backup_emails_from:
+
+# Email address to send backup system alerts TO
+# Example: admin@example.com
+cachet_backup_emails_to:
+
+# The following block is OPTIONAL
+# Fill this out to enable automated app/db backups to Spaces
+# The following tutorial will help you get this info: http://do.co/space-key
+# Note that the key and secret need to go in `vault.yml`
+cachet_spaces_key: "{{ vault_cachet_spaces_key }}"
+cachet_spaces_secret: "{{ vault_cachet_spaces_secret }}"
+cachet_spaces_endpoint:
+cachet_spaces_bucket:
+
+# You shouldn't need to update the variables below
+cachet_app_key: "{{ vault_cachet_app_key }}"
+cachet_app_url: "https://{{ cachet_hostname }}"
+cachet_db_host: "{{ hostvars['cachet-db']['ansible_eth1']['ipv4']['address'] }}"
+cachet_db_port: 3306 # if you change this, update the mysql firewall in terraform as well
+cachet_db_database: "{{ shared_db }}"
+cachet_db_username: "{{ shared_db_user }}"
+cachet_db_password: "{{ shared_db_pass }}"

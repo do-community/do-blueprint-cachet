@@ -1,0 +1,6 @@
+---
+# A strong password for the root database user
+vault_shared_mysql_root_pass:
+
+# A strong password for the cachet database user
+vault_shared_db_pass:

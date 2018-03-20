@@ -1,0 +1,15 @@
+---
+# You shouldn't need to update anything in this file
+mysql_root_password: "{{ shared_mysql_root_pass }}"
+
+mysql_databases:
+  - name: "{{ shared_db }}"
+
+mysql_users:
+  - name: "{{ shared_db_user }}"
+    password: "{{ shared_db_pass }}"
+    priv: "{{ shared_db }}.*:ALL"
+    host: "%"
+
+# bind mysql to the private network ip
+mysql_bind_address: "{{ ansible_eth1['ipv4']['address'] }}"

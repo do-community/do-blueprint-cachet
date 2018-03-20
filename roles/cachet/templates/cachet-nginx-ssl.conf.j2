@@ -1,0 +1,25 @@
+server {
+    listen 443 default ssl;
+    listen [::]:443 default ssl;
+    server_name  {{ cachet_hostname }};
+
+    ssl_certificate /etc/letsencrypt/live/{{ cachet_hostname }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ cachet_hostname }}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    root /var/www/cachet/public;
+    index index.php;
+
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_keep_conn on;
+    }
+}

@@ -1,0 +1,201 @@
+---
+
+# fixes composer IPv6 issues
+- name: Set IPv4 outbound connectivity precedence
+  lineinfile:
+    path: /etc/gai.conf
+    insertafter: '^#precedence ::ffff:0:0/96  100'
+    line: 'precedence ::ffff:0:0/96  100'
+
+- name: Install Certbot repository
+  apt_repository:
+    repo: "ppa:certbot/certbot"
+    update_cache: yes
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nginx
+    - php7.0
+    - php7.0-cli
+    - php7.0-fpm
+    - php7.0-gd
+    - php7.0-intl
+    - php7.0-curl
+    - php7.0-mbstring
+    - php7.0-mcrypt
+    - php7.0-mysql
+    - php7.0-readline
+    - php7.0-zip
+    - php-apcu
+    - php-db
+    - php-pear
+    - mysql-client
+    - python-certbot-nginx
+
+# NOTE: `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
+#       if you get a fork error on MacOS due to using `lookup()`
+- name: Download Composer
+  get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-installer.php
+    checksum: sha384:{{ lookup('url', 'https://composer.github.io/installer.sig') }}
+
+- name: Install Composer
+  command: php composer-installer.php --install-dir=/usr/local/bin --filename=composer
+  args:
+    chdir: /tmp
+    creates: /usr/local/bin/composer
+  register: composer
+
+- name: Check for Prestissimo install
+  stat:
+    path: /root/.config/composer/vendor/hirak/prestissimo/
+  register: prestissimo
+
+- name: Install Prestissimo Composer plugin
+  composer:
+    command: require
+    arguments: hirak/prestissimo:^0.3
+    global_command: true
+  when: prestissimo.stat.exists == false
+
+- name: Create Cachet directory
+  file:
+    path: /var/www/cachet
+    owner: www-data
+    state: directory
+
+- name: Download Cachet
+  get_url:
+    url: https://github.com/CachetHQ/Cachet/archive/{{cachet_version}}.tar.gz
+    dest: /tmp/cachet-{{ cachet_version }}.tar.gz
+    # no checksum available
+  register: cachet
+
+- name: Extract Cachet to directory
+  unarchive:
+    remote_src: yes
+    src: /tmp/cachet-{{ cachet_version }}.tar.gz
+    dest: /var/www/cachet
+    owner: www-data
+    extra_opts: [--strip-components=1]
+  when: cachet.changed
+
+- name: Copy Nginx configuration
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - reload nginx
+
+- name: Copy PHP-FPM pool configuration
+  copy:
+    src: php-fpm-pool.conf
+    dest: /etc/php/7.0/fpm/pool.d/www.conf
+  notify:
+    - reload php-fpm
+
+# http-only config to bootstrap certificates before installing https config
+- name: Create HTTP-only Nginx site config from template
+  template:
+    src: cachet-nginx.conf.j2
+    dest: /etc/nginx/conf.d/{{ cachet_hostname }}.conf
+  notify:
+    - reload nginx
+
+- name: Reload Nginx before Let's Encrypt challenge
+  meta: flush_handlers
+
+# Let's Encrypt TOS: https://letsencrypt.org/documents/2017.11.15-LE-SA-v1.2.pdf
+- name: Get Let's Encrypt certificate
+  command: certbot certonly --nginx -d {{ cachet_hostname }} -n -m {{ cachet_letsencrypt_email }} --agree-tos
+  args:
+    creates: /etc/letsencrypt/renewal/{{ cachet_hostname }}.conf
+
+- name: Create SSL-enabled Nginx site config from template
+  template:
+    src: cachet-nginx-ssl.conf.j2
+    dest: /etc/nginx/conf.d/{{ cachet_hostname }}-ssl.conf
+  notify:
+    - reload nginx
+
+- name: Check for previous Cachet dependencies install
+  stat:
+    path: /var/www/cachet/vendor/
+  register: vendor
+
+- name: Install Cachet dependencies with Composer
+  composer:
+    command: install
+    working_dir: /var/www/cachet
+    no_dev: true
+    no_scripts: true
+  when: vendor.stat.exists == false
+  notify:
+    - update app
+
+- name: Check for previous additional packages install
+  stat:
+    path: /var/www/cachet/vendor/spatie/laravel-backup
+  register: additional
+
+- name: Install additional packages with Composer
+  composer:
+    command: require
+    arguments: spatie/laravel-backup:^3.0.0 league/flysystem-aws-s3-v3:^1.0
+    working_dir: /var/www/cachet
+    no_dev: true
+    no_scripts: true
+  when: additional.stat.exists == false
+  notify:
+    - update app
+
+- name: Create Cachet .env file from template
+  template:
+    src: cachet-env.j2
+    dest: /var/www/cachet/.env
+    owner: www-data
+    mode: 0600
+  notify:
+    - update app
+
+- name: Add backup service provider to config/app.php
+  lineinfile:
+    path: /var/www/cachet/config/app.php
+    insertafter: 'TwigBridge\\ServiceProvider'
+    line: '        ''Spatie\Backup\BackupServiceProvider'','
+  notify:
+    - update app
+
+- name: Copy updated app/Console/Kernel.php with backup tasks scheduled
+  copy:
+    src: console-kernel.php
+    dest: /var/www/cachet/app/Console/Kernel.php
+    owner: www-data
+  notify:
+    - update app
+
+- name: Create config/laravel-backup.php from template
+  template:
+    src: laravel-backup.php.j2
+    dest: /var/www/cachet/config/laravel-backup.php
+    owner: www-data
+  notify:
+    - update app
+
+- name: Create config/filesystems.php from template
+  template:
+    src: filesystems.php.j2
+    dest: /var/www/cachet/config/filesystems.php
+    owner: www-data
+  notify:
+    - update app
+
+- name: Install Laravel scheduler cron job
+  cron:
+    name: "laravel scheduler runner"
+    job: "/usr/bin/php /var/www/cachet/artisan schedule:run >> /dev/null 2>&1"
+    user: www-data

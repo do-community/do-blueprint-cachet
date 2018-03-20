@@ -1,0 +1,13 @@
+*.tfvars*
+!*.tfvars.j2
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.swp
+*.retry
+roles/**
+!roles/cachet/
+!roles/cachet/**
+terraform.py
+.vault_pass.txt
+.DS_Store

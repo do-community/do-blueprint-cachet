@@ -1,0 +1,14 @@
+---
+- name: Set up MySQL Droplet
+  hosts: mysql
+  tags:
+    - mysql
+  roles:
+    - role: mysql
+
+- name: Set up Cachet Droplet
+  hosts: cachet
+  tags:
+    - cachet
+  roles:
+    - role: cachet

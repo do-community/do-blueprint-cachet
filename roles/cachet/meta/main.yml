@@ -1,0 +1,15 @@
+galaxy_info:
+  author: DigitalOcean Community
+  description: Cachet role for installing the Cachet status page app.
+  company: DigitalOcean
+  license: MIT
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      versions:
+        - 16.04
+  galaxy_tags:
+    - php
+    - laravel
+    - status
+dependencies: []

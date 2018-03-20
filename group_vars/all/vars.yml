@@ -1,0 +1,6 @@
+---
+# You shouldn't need to update anything in this file
+shared_mysql_root_pass: "{{ vault_shared_mysql_root_pass }}"
+shared_db_user: cachet
+shared_db_pass: "{{ vault_shared_db_pass }}"
+shared_db: cachet
