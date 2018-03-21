@@ -2,6 +2,7 @@
 !*.tfvars.j2
 *.tfstate
 *.tfstate.backup
+*.tfstate.lock.info
 .terraform/
 *.swp
 *.retry
