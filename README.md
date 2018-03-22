@@ -274,22 +274,24 @@ Though any configuration changes should be done through Ansible, there are a few
 cd /var/www/cachet
 ```
 
+It's a good idea to run the following commands as the **www-data** user. If there are any directories or error logs inadvertently created as the **root** user it could cause errors later on. To run commands as **www-data** we will prepend them with `sudo -u www-data`.
+
 If you're just trying out Cachet and want to load some sample data in the interface, you can use the following command to seed the database with demo data:
 
 ```shell
-php artisan cachet:seed
+sudo -u www-data php artisan cachet:seed
 ```
 
 To manually run a backup, enter the following:
 
 ```shell
-php artisan backup:run
+sudo -u www-data php artisan backup:run
 ```
 
 You can also list out your backups and their status with:
 
 ```shell
-php artisan backup:list
+sudo -u www-data php artisan backup:list
 ```
 
 ### Deprovisioning the Infrastructure
