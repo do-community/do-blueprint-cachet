@@ -255,7 +255,7 @@ You will be prompted for your Vault password. After you enter it, Ansible will c
 After the Droplets are set up, you'll still need to walk through Cachet's web-based setup. It's a short, three-step process where you'll choose some additional settings and set up a user account.
 
 > **Important: Step 1 will ask you for some cache and mail driver information, _despite the fact that we've already configured this_**.
-
+>
 > Whatever you enter here will overwrite the configuration that Ansible just generated. Leave the **Cache Driver** and **Session Driver** settings as is (`APC(u)`), and fill in the mail settings with the same values entered in the previous step.
 
 The following steps will prompt you for new information about time zones and language choices, then set up the first user. When done, you'll be taken to the Cachet dashboard. Your installation is finished!
@@ -274,7 +274,7 @@ Though any configuration changes should be done through Ansible, there are a few
 cd /var/www/cachet
 ```
 
-It's a good idea to run the following commands as the **www-data** user. If there are any directories or error logs inadvertently created as the **root** user it could cause errors later on. To run commands as **www-data** we will prepend them with `sudo -u www-data`.
+It's a good idea to run the following commands as the **www-data** user. If there are any directories or logs inadvertently created as the **root** user it could cause errors later on. To run commands as **www-data** we will prepend them with `sudo -u www-data`.
 
 If you're just trying out Cachet and want to load some sample data in the interface, you can use the following command to seed the database with demo data:
 
