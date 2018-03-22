@@ -8,6 +8,7 @@
 
 - name: Set up Cachet Droplet
   hosts: cachet
+  force_handlers: True
   tags:
     - cachet
   roles:
