@@ -199,3 +199,14 @@
     name: "laravel scheduler runner"
     job: "/usr/bin/php /var/www/cachet/artisan schedule:run >> /dev/null 2>&1"
     user: www-data
+
+- name: Check for existing backups directory
+  stat:
+    path: /var/www/cachet/storage/laravel-backups
+  register: backup
+
+- name: Run a backup to initialize directories
+  command: chdir=/var/www/cachet php artisan backup:run
+  become: true
+  become_user: www-data
+  when: backup.stat.exists == false
