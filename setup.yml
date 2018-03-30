@@ -6,6 +6,10 @@
     terraform_inventory_version: v1.0.1
     agent_msg: |
         Ansible and Terraform are configured to use the Blueprint SSH keys.
+        Use `chown` now to give your user ownership of the new keys...
+
+        sudo chown $USER:$USER ~/.ssh/blueprint-id_rsa*
+
         To SSH into any of the created infrastructure, either provide the
         identify file on the command line by typing...
 
